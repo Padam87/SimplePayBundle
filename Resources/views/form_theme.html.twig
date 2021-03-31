@@ -1,0 +1,7 @@
+{% use 'form_div_layout.html.twig' %}
+
+{%- block widget_attributes -%}
+    {% set full_name = full_name|replace({'[0]': '[]', '[1]': '[]', '[2]': '[]', '[3]': '[]', '[4]': '[]', '[5]': '[]', '[6]': '[]', '[7]': '[]', '[8]': '[]', '[9]': '[]'}) %}
+
+    {{ parent() }}
+{%- endblock widget_attributes -%}

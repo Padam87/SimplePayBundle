@@ -1,0 +1,27 @@
+{
+    "name": "padam87/simple-pay-bundle",
+    "description": "A bundle for Simple Pay V2 payment integration.",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Adam Prager",
+            "email": "prager.adam87@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"Padam87\\SimplePayBundle\\": ""}
+    },
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "doctrine/doctrine-bundle": "^2.1",
+        "doctrine/orm": "^2.6",
+        "symfony/config": "^4.0 || ^5.0",
+        "symfony/dependency-injection": "^4.0 || ^5.0",
+        "symfony/http-client": "^4.0 || ^5.0",
+        "symfony/http-foundation": "^4.0 || ^5.0",
+        "symfony/property-access": "^4.0 || ^5.0",
+        "symfony/routing": "^4.0 || ^5.0",
+        "symfony/validator": "^4.0 || ^5.0",
+    }
+}

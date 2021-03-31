@@ -1,0 +1,10 @@
+services:
+    Padam87\SimplePayBundle\Service\ConfigHelper:
+        arguments:
+            $config: '%padam87_simple_pay.config%'
+    Padam87\SimplePayBundle\Service\SimplePay:
+        autowire: true
+        public: true
+    Padam87\SimplePayBundle\Form\StartPaymentType:
+        autowire: true
+        autoconfigure: true
