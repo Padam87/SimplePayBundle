@@ -59,7 +59,7 @@ class Item
             'title' => $this->getTitle(),
             'description' => $this->getDescription(),
             'amount' => $this->getAmount(),
-            'price' => $this->getPrice(),
+            'price' => intval($this->getPrice()) == $this->getPrice() ? intval($this->getPrice()) : $this->getPrice(),
             'tax' => $this->getTax(),
         ];
     }
