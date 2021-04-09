@@ -61,4 +61,9 @@ class ConfigHelper
     {
         return $this->config['base_url'] . '/start';
     }
+
+    public function getDoUrl(): string
+    {
+        return $this->config['base_url'] . '/do';
+    }
 }
