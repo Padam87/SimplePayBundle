@@ -61,6 +61,10 @@ class SimplePay
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
+        if ($transaction->getRecurring()) {
+            $data['recurring'] = $transaction->getRecurring()->toArray();
+        }
+
         $response = $this->client->request(
             'POST',
             $this->configHelper->getStartUrl(),

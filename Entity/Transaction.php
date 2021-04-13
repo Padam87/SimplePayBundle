@@ -128,6 +128,13 @@ abstract class Transaction
     protected ?Browser $browser = null;
 
     /**
+     * @Assert\Valid()
+     *
+     * @ORM\Embedded(class="Padam87\SimplePayBundle\Entity\Recurring")
+     */
+    protected ?Recurring $recurring = null;
+
+    /**
      * @var Item[]|Collection
      *
      * @Assert\Valid()
@@ -370,6 +377,27 @@ abstract class Transaction
     public function setBrowser(?Browser $browser): self
     {
         $this->browser = $browser;
+
+        return $this;
+    }
+
+    public function isRecurring(): bool
+    {
+        if ($this->recurring === null) {
+            return false;
+        }
+
+        return  $this->recurring->getTimes() !== null;
+    }
+
+    public function getRecurring(): ?Recurring
+    {
+        return $this->recurring;
+    }
+
+    public function setRecurring(?Recurring $recurring): self
+    {
+        $this->recurring = $recurring;
 
         return $this;
     }
