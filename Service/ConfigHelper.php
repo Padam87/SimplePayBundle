@@ -66,4 +66,9 @@ class ConfigHelper
     {
         return $this->config['base_url'] . '/do';
     }
+
+    public function getDoRecurringUrl(): string
+    {
+        return $this->config['base_url'] . '/dorecurring';
+    }
 }

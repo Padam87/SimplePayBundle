@@ -20,9 +20,9 @@ class Recurring
     protected ?\DateTime $until = null;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
-    protected float $maxAmount = 0.0;
+    protected ?float $maxAmount = 0.0;
 
     public function toArray(): array
     {

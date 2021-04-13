@@ -28,6 +28,11 @@ abstract class Transaction
     protected ?int $cardId = null;
 
     /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected ?string $token = null;
+
+    /**
      * @Assert\NotBlank()
      *
      * @ORM\Column()
@@ -179,6 +184,18 @@ abstract class Transaction
     public function setCardId(?int $cardId): self
     {
         $this->cardId = $cardId;
+
+        return $this;
+    }
+
+    public function getToken(): ?string
+    {
+        return $this->token;
+    }
+
+    public function setToken(?string $token): self
+    {
+        $this->token = $token;
 
         return $this;
     }

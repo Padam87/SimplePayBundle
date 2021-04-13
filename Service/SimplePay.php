@@ -117,6 +117,39 @@ class SimplePay
         return $response->toArray();
     }
 
+    public function doRecurring(Transaction $transaction): array
+    {
+        $violations = $this->validator->validate($transaction);
+
+        if ($violations->count() > 0) {
+            throw new \Exception('Transaction must be valid');
+        }
+
+        $merchant = $this->configHelper->getMerchant($transaction->getCurrency());
+
+        $transaction->setMerchant($merchant['id']);
+
+        $data = $this->transactionToArray($transaction);
+        $data['token'] = $transaction->getToken();
+        $data['type'] = 'MIT';
+        $data['threeDSReqAuthMethod'] = '02';
+
+        $response = $this->client->request(
+            'POST',
+            $this->configHelper->getDoRecurringUrl(),
+            [
+                'json' => $data,
+                'headers' => [
+                    'Signature' => $this->getSignature($merchant['secret'], $data),
+                ],
+            ]
+        );
+
+        $this->handleResponse($response, $transaction);
+
+        return $response->toArray();
+    }
+
     private function transactionToArray(Transaction $transaction, ?string $cardSecret = null): array
     {
         $data = [
@@ -230,7 +263,7 @@ class SimplePay
         }
 
         if (null === $transaction = $this->em->find($this->configHelper->getTransactionEntity(), $data['transactionId'])) {
-            throw new UnknownTransactionException($data['t']);
+            throw new UnknownTransactionException($data['transactionId']);
         }
 
         $transaction->setStatus($data['status']);
