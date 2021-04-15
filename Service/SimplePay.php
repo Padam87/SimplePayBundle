@@ -150,6 +150,31 @@ class SimplePay
         return $response->toArray();
     }
 
+    public function tokenCancel(string $token, string $currency): array
+    {
+        $merchant = $this->configHelper->getMerchant($currency);
+
+        $data = [
+            'token' => $token,
+            'merchant' => $merchant,
+            'salt' => bin2hex(openssl_random_pseudo_bytes(16)),
+            'sdkVersion' => '@Padam87\SimplePayBundle',
+        ];
+
+        $response = $this->client->request(
+            'POST',
+            $this->configHelper->getTokenCancelUrl(),
+            [
+                'json' => $data,
+                'headers' => [
+                    'Signature' => $this->getSignature($merchant['secret'], $data),
+                ],
+            ]
+        );
+
+        return $response->toArray();
+    }
+
     private function transactionToArray(Transaction $transaction, ?string $cardSecret = null): array
     {
         $data = [

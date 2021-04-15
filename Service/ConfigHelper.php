@@ -71,4 +71,9 @@ class ConfigHelper
     {
         return $this->config['base_url'] . '/dorecurring';
     }
+
+    public function getTokenCancelUrl(): string
+    {
+        return $this->config['base_url'] . '/tokencancel';
+    }
 }
