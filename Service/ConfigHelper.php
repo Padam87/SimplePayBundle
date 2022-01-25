@@ -61,4 +61,24 @@ class ConfigHelper
     {
         return $this->config['base_url'] . '/start';
     }
+
+    public function getDoUrl(): string
+    {
+        return $this->config['base_url'] . '/do';
+    }
+
+    public function getDoRecurringUrl(): string
+    {
+        return $this->config['base_url'] . '/dorecurring';
+    }
+
+    public function getCardCancelUrl(): string
+    {
+        return $this->config['base_url'] . '/cardcancel';
+    }
+
+    public function getTokenCancelUrl(): string
+    {
+        return $this->config['base_url'] . '/tokencancel';
+    }
 }

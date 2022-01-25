@@ -14,13 +14,23 @@ abstract class Transaction
     const STATUS_FAIL = 'FAIL';
     const STATUS_TIMEOUT = 'TIMEOUT';
     const STATUS_CANCEL = 'CANCEL';
-    const STATUS_FINISHED = 'SUCCESS';
+    const STATUS_FINISHED = 'FINISHED';
 
     /**
      * @ORM\Id()
      * @ORM\Column(type="integer")
      */
     protected ?int $id = null;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    protected ?int $cardId = null;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected ?string $token = null;
 
     /**
      * @Assert\NotBlank()
@@ -72,6 +82,13 @@ abstract class Transaction
     protected array $methods = ['CARD'];
 
     /**
+     * @Assert\GreaterThanOrEqual(0)
+     *
+     * @ORM\Column(type="float")
+     */
+    protected float $total = 0.0;
+
+    /**
      * @Assert\NotBlank()
      *
      * @ORM\Column(type="integer")
@@ -109,6 +126,20 @@ abstract class Transaction
     protected float $discount = 0.0;
 
     /**
+     * @Assert\Valid()
+     *
+     * @ORM\Embedded(class="Padam87\SimplePayBundle\Entity\Browser")
+     */
+    protected ?Browser $browser = null;
+
+    /**
+     * @Assert\Valid()
+     *
+     * @ORM\Embedded(class="Padam87\SimplePayBundle\Entity\Recurring")
+     */
+    protected ?Recurring $recurring = null;
+
+    /**
      * @var Item[]|Collection
      *
      * @Assert\Valid()
@@ -141,6 +172,30 @@ abstract class Transaction
     public function setId(?int $id): self
     {
         $this->id = $id;
+
+        return $this;
+    }
+
+    public function getCardId(): ?int
+    {
+        return $this->cardId;
+    }
+
+    public function setCardId(?int $cardId): self
+    {
+        $this->cardId = $cardId;
+
+        return $this;
+    }
+
+    public function getToken(): ?string
+    {
+        return $this->token;
+    }
+
+    public function setToken(?string $token): self
+    {
+        $this->token = $token;
 
         return $this;
     }
@@ -225,6 +280,18 @@ abstract class Transaction
     public function setMethods(array $methods): self
     {
         $this->methods = $methods;
+
+        return $this;
+    }
+
+    public function getTotal(): float
+    {
+        return $this->total;
+    }
+
+    public function setTotal(float $total): self
+    {
+        $this->total = $total;
 
         return $this;
     }
@@ -315,6 +382,39 @@ abstract class Transaction
     public function setDiscount($discount)
     {
         $this->discount = $discount;
+
+        return $this;
+    }
+
+    public function getBrowser(): ?Browser
+    {
+        return $this->browser;
+    }
+
+    public function setBrowser(?Browser $browser): self
+    {
+        $this->browser = $browser;
+
+        return $this;
+    }
+
+    public function isRecurring(): bool
+    {
+        if ($this->recurring === null) {
+            return false;
+        }
+
+        return  $this->recurring->getTimes() !== null;
+    }
+
+    public function getRecurring(): ?Recurring
+    {
+        return $this->recurring;
+    }
+
+    public function setRecurring(?Recurring $recurring): self
+    {
+        $this->recurring = $recurring;
 
         return $this;
     }

@@ -15,6 +15,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class SimplePay
 {
@@ -53,12 +54,154 @@ class SimplePay
 
         $transaction->setMerchant($merchant['id']);
 
-        $backref = $this->router->generate(
+        $data = $this->transactionToArray($transaction, $cardSecret);
+        $data['url'] = $this->router->generate(
             $this->configHelper->get('backref_route'),
             $this->getRouteParameters($transaction, $this->configHelper->get('backref_route_parameters')),
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
+        if ($transaction->getRecurring()) {
+            $data['recurring'] = $transaction->getRecurring()->toArray();
+        }
+
+        $response = $this->client->request(
+            'POST',
+            $this->configHelper->getStartUrl(),
+            [
+                'json' => $data,
+                'headers' => [
+                    'Signature' => $this->getSignature($merchant['secret'], $data),
+                ],
+            ]
+        );
+
+        $this->handleResponse($response, $transaction);
+
+        return $response->toArray();
+    }
+
+    public function callDo(Transaction $transaction, ?string $cardSecret = null): array
+    {
+        $violations = $this->validator->validate($transaction);
+
+        if ($violations->count() > 0) {
+            throw new \Exception('Transaction must be valid');
+        }
+
+        $merchant = $this->configHelper->getMerchant($transaction->getCurrency());
+
+        $transaction->setMerchant($merchant['id']);
+
+        $data = $this->transactionToArray($transaction, $cardSecret);
+        $data['cardId'] = $transaction->getCardId();
+        $data['type'] = 'CIT';
+
+        if ($transaction->getBrowser()) {
+            $data['browser'] = $transaction->getBrowser()->toArray();
+        }
+
+        $response = $this->client->request(
+            'POST',
+            $this->configHelper->getDoUrl(),
+            [
+                'json' => $data,
+                'headers' => [
+                    'Signature' => $this->getSignature($merchant['secret'], $data),
+                ],
+            ]
+        );
+
+        $this->handleResponse($response, $transaction);
+
+        return $response->toArray();
+    }
+
+    public function doRecurring(Transaction $transaction): array
+    {
+        $violations = $this->validator->validate($transaction);
+
+        if ($violations->count() > 0) {
+            throw new \Exception('Transaction must be valid');
+        }
+
+        $merchant = $this->configHelper->getMerchant($transaction->getCurrency());
+
+        $transaction->setMerchant($merchant['id']);
+
+        $data = $this->transactionToArray($transaction);
+        $data['token'] = $transaction->getToken();
+        $data['type'] = 'MIT';
+        $data['threeDSReqAuthMethod'] = '02';
+
+        $response = $this->client->request(
+            'POST',
+            $this->configHelper->getDoRecurringUrl(),
+            [
+                'json' => $data,
+                'headers' => [
+                    'Signature' => $this->getSignature($merchant['secret'], $data),
+                ],
+            ]
+        );
+
+        $this->handleResponse($response, $transaction);
+
+        return $response->toArray();
+    }
+
+    public function tokenCancel(string $token, string $currency): array
+    {
+        $merchant = $this->configHelper->getMerchant($currency);
+
+        $data = [
+            'token' => $token,
+            'merchant' => $merchant['id'],
+            'salt' => bin2hex(openssl_random_pseudo_bytes(16)),
+            'sdkVersion' => '@Padam87\SimplePayBundle',
+        ];
+
+        $response = $this->client->request(
+            'POST',
+            $this->configHelper->getTokenCancelUrl(),
+            [
+                'json' => $data,
+                'headers' => [
+                    'Signature' => $this->getSignature($merchant['secret'], $data),
+                ],
+            ]
+        );
+
+        return $response->toArray();
+    }
+
+    public function cardCancel(string $cardId, string $currency): array
+    {
+        $merchant = $this->configHelper->getMerchant($currency);
+
+        $data = [
+            'cardId' => $cardId,
+            'merchant' => $merchant['id'],
+            'salt' => bin2hex(openssl_random_pseudo_bytes(16)),
+            'sdkVersion' => '@Padam87\SimplePayBundle',
+        ];
+
+        $response = $this->client->request(
+            'POST',
+            $this->configHelper->getCardCancelUrl(),
+            [
+                'json' => $data,
+                'headers' => [
+                    'Signature' => $this->getSignature($merchant['secret'], $data),
+                ],
+            ]
+        );
+
+        return $response->toArray();
+    }
+
+    private function transactionToArray(Transaction $transaction, ?string $cardSecret = null): array
+    {
         $data = [
             'salt' => $transaction->getSalt(),
             'merchant' => $transaction->getMerchant(),
@@ -68,9 +211,8 @@ class SimplePay
             'language' => $transaction->getLanguage(),
             'sdkVersion' => '@Padam87\SimplePayBundle',
             'methods' => $transaction->getMethods(),
-            //'total' => null, // not used, overwritten by items
+            'total' => intval($transaction->getTotal()) == $transaction->getTotal() ? intval($transaction->getTotal()) : $transaction->getTotal(),
             'timeout' => @date("c", time() + $transaction->getTimeout()),
-            'url' => $backref,
             'invoice' => $transaction->getInvoice()->toArray(),
             'delivery' => $transaction->getDelivery() ? $transaction->getDelivery()->toArray() : null,
             'shippingPrice' => $transaction->getShippingPrice(),
@@ -91,21 +233,18 @@ class SimplePay
             $data['items'][] = $item->toArray();
         }
 
-        $response = $this->client->request(
-            'POST',
-            $this->configHelper->getStartUrl(),
-            [
-                'json' => $data,
-                'headers' => [
-                    'Signature' => $this->getSignature($merchant['secret'], $data),
-                ],
-            ]
-        );
+        return $data;
+    }
 
+    private function handleResponse(ResponseInterface $response, Transaction $transaction)
+    {
         $responseData = $response->toArray();
 
         if (array_key_exists('errorCodes', $responseData)) {
-            throw new ErrorCodeException($responseData['errorCodes']);
+            // 3004: Redirect during 3DS challenge ... not really an error, just a case
+            if (count($responseData['errorCodes']) > 1 || !in_array(3004, $responseData['errorCodes'])) {
+                throw new ErrorCodeException($responseData['errorCodes']);
+            }
         }
 
         if (null !== $old = $this->em->find($this->configHelper->getTransactionEntity(), $responseData['transactionId'])) {
@@ -118,8 +257,6 @@ class SimplePay
 
             $this->em->persist($transaction);
         }
-
-        return $responseData;
     }
 
     private function getRouteParameters(Transaction $transaction, array $config): array
@@ -176,7 +313,7 @@ class SimplePay
         }
 
         if (null === $transaction = $this->em->find($this->configHelper->getTransactionEntity(), $data['transactionId'])) {
-            throw new UnknownTransactionException($data['t']);
+            throw new UnknownTransactionException($data['transactionId']);
         }
 
         $transaction->setStatus($data['status']);
