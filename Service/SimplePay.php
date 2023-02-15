@@ -19,27 +19,14 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class SimplePay
 {
-    private HttpClientInterface $client;
-    private ConfigHelper $configHelper;
-    private UrlGeneratorInterface $router;
-    private ValidatorInterface $validator;
-    private RequestStack $requestStack;
-    private EntityManagerInterface $em;
-
     public function __construct(
-        HttpClientInterface $client,
-        ConfigHelper $configHelper,
-        UrlGeneratorInterface $router,
-        ValidatorInterface $validator,
-        RequestStack $requestStack,
-        EntityManagerInterface $em
+        private HttpClientInterface $client,
+        private ConfigHelper $configHelper,
+        private UrlGeneratorInterface $router,
+        private ValidatorInterface $validator,
+        private RequestStack $requestStack,
+        private EntityManagerInterface $em
     ) {
-        $this->client = $client;
-        $this->configHelper = $configHelper;
-        $this->router = $router;
-        $this->validator = $validator;
-        $this->requestStack = $requestStack;
-        $this->em = $em;
     }
 
     public function start(Transaction $transaction, ?string $cardSecret = null): array
@@ -61,7 +48,7 @@ class SimplePay
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-        if ($transaction->getRecurring()) {
+        if ($transaction->getRecurring() !== null) {
             $data['recurring'] = $transaction->getRecurring()->toArray();
         }
 
@@ -97,7 +84,7 @@ class SimplePay
         $data['cardId'] = $transaction->getCardId();
         $data['type'] = 'CIT';
 
-        if ($transaction->getBrowser()) {
+        if ($transaction->getBrowser() !== null) {
             $data['browser'] = $transaction->getBrowser()->toArray();
         }
 
@@ -211,10 +198,10 @@ class SimplePay
             'language' => $transaction->getLanguage(),
             'sdkVersion' => '@Padam87\SimplePayBundle',
             'methods' => $transaction->getMethods(),
-            'total' => intval($transaction->getTotal()) == $transaction->getTotal() ? intval($transaction->getTotal()) : $transaction->getTotal(),
+            'total' => (int) $transaction->getTotal() == $transaction->getTotal() ? (int) $transaction->getTotal() : $transaction->getTotal(),
             'timeout' => @date("c", time() + $transaction->getTimeout()),
             'invoice' => $transaction->getInvoice()->toArray(),
-            'delivery' => $transaction->getDelivery() ? $transaction->getDelivery()->toArray() : null,
+            'delivery' => $transaction->getDelivery() !== null ? $transaction->getDelivery()->toArray() : null,
             'shippingPrice' => $transaction->getShippingPrice(),
             'discount' => $transaction->getDiscount(),
         ];
@@ -277,7 +264,7 @@ class SimplePay
             $request = $this->requestStack->getCurrentRequest();
         }
 
-        $data = json_decode(base64_decode($request->get('r')), true);
+        $data = json_decode(base64_decode((string) $request->get('r')), true);
 
         $merchant = $this->configHelper->getMerchantById($data['m']);
 
@@ -336,6 +323,6 @@ class SimplePay
 
     public function getSignature($secret, array $data)
     {
-        return base64_encode(hash_hmac('sha384', json_encode($data), trim($secret), true));
+        return base64_encode(hash_hmac('sha384', json_encode($data), trim((string) $secret), true));
     }
 }

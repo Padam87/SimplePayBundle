@@ -4,32 +4,24 @@ namespace Padam87\SimplePayBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Embeddable()
- */
+#[ORM\Embeddable]
 class Recurring
 {
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
+    #[ORM\Column(type: 'integer', nullable: true)]
     protected ?int $times = null;
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
+    #[ORM\Column(type: 'datetime', nullable: true)]
     protected ?\DateTime $until = null;
 
-    /**
-     * @ORM\Column(type="float", nullable=true)
-     */
+    #[ORM\Column(type: 'float', nullable: true)]
     protected ?float $maxAmount = 0.0;
 
     public function toArray(): array
     {
         return [
             'times' => $this->getTimes(),
-            'until' => $this->getUntil() ? $this->getUntil()->format(DATE_ATOM) : null,
-            'maxAmount' => intval($this->getMaxAmount()) == $this->getMaxAmount() ? intval($this->getMaxAmount()) : $this->getMaxAmount(),
+            'until' => $this->getUntil() !== null ? $this->getUntil()->format(DATE_ATOM) : null,
+            'maxAmount' => (int) $this->getMaxAmount() == $this->getMaxAmount() ? (int) $this->getMaxAmount() : $this->getMaxAmount(),
         ];
     }
 

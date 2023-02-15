@@ -7,153 +7,99 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-abstract class Transaction
+#[ORM\MappedSuperclass]
+class Transaction
 {
-    const STATUS_STARTED = 'STARTED';
-    const STATUS_SUCCESS = 'SUCCESS';
-    const STATUS_FAIL = 'FAIL';
-    const STATUS_TIMEOUT = 'TIMEOUT';
-    const STATUS_CANCEL = 'CANCEL';
-    const STATUS_FINISHED = 'FINISHED';
+    public const STATUS_STARTED = 'STARTED';
+    public const STATUS_SUCCESS = 'SUCCESS';
+    public const STATUS_FAIL = 'FAIL';
+    public const STATUS_TIMEOUT = 'TIMEOUT';
+    public const STATUS_CANCEL = 'CANCEL';
+    public const STATUS_FINISHED = 'FINISHED';
 
-    /**
-     * @ORM\Id()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: 'integer')]
     protected ?int $id = null;
 
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
+    #[ORM\Column(type: 'integer', nullable: true)]
     protected ?int $cardId = null;
 
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
+    #[ORM\Column(type: 'string', nullable: true)]
     protected ?string $token = null;
 
-    /**
-     * @Assert\NotBlank()
-     *
-     * @ORM\Column()
-     */
+    #[Assert\NotBlank]
+    #[ORM\Column]
     protected ?string $salt = null;
 
-    /**
-     * @ORM\Column()
-     */
+    #[ORM\Column]
     protected ?string $merchant = null;
 
-    /**
-     * @Assert\NotBlank()
-     *
-     * @ORM\Column()
-     */
+    #[Assert\NotBlank]
+    #[ORM\Column]
     protected ?string $orderRef = null;
 
-    /**
-     * @Assert\Currency()
-     * @Assert\Choice({"HUF", "EUR", "USD"})
-     *
-     * @ORM\Column()
-     */
+    #[Assert\Currency]
+    #[Assert\Choice(['HUF', 'EUR', 'USD'])]
+    #[ORM\Column]
     protected string $currency = 'HUF';
 
-    /**
-     * @Assert\NotBlank()
-     *
-     * @ORM\Column()
-     */
+    #[Assert\NotBlank]
+    #[ORM\Column]
     protected ?string $customerEmail = null;
 
-    /**
-     * @Assert\NotBlank()
-     * @Assert\Language()
-     *
-     * @ORM\Column()
-     */
+    #[Assert\NotBlank]
+    #[Assert\Language]
+    #[ORM\Column]
     protected string $language = 'hu';
 
-    /**
-     * @Assert\Count(min="1")
-     *
-     * @ORM\Column(type="simple_array")
-     */
+    #[Assert\Count(min: 1)]
+    #[ORM\Column(type: 'simple_array')]
     protected array $methods = ['CARD'];
 
-    /**
-     * @Assert\GreaterThanOrEqual(0)
-     *
-     * @ORM\Column(type="float")
-     */
+    #[Assert\GreaterThanOrEqual(0)]
+    #[ORM\Column(type: 'float')]
     protected float $total = 0.0;
 
-    /**
-     * @Assert\NotBlank()
-     *
-     * @ORM\Column(type="integer")
-     */
+    #[Assert\NotBlank]
+    #[ORM\Column(type: 'integer')]
     protected int $timeout = 600;
 
-    /**
-     * @Assert\Valid()
-     *
-     * @ORM\Embedded(class="Padam87\SimplePayBundle\Entity\Invoice")
-     */
+    #[Assert\Valid]
+    #[ORM\Embedded(class: Invoice::class)]
     protected Invoice $invoice;
 
-    /**
-     * @Assert\Valid()
-     *
-     * @ORM\Embedded(class="Padam87\SimplePayBundle\Entity\Delivery")
-     */
+    #[Assert\Valid]
+    #[ORM\Embedded(class: Delivery::class)]
     protected ?Delivery $delivery = null;
 
-    /**
-     * @Assert\NotBlank()
-     * @Assert\GreaterThanOrEqual(0)
-     *
-     * @ORM\Column(type="float")
-     */
+    #[Assert\NotBlank]
+    #[Assert\GreaterThanOrEqual(0)]
+    #[ORM\Column(type: 'float')]
     protected float $shippingPrice = 0.0;
 
-    /**
-     * @Assert\NotBlank()
-     * @Assert\GreaterThanOrEqual(0)
-     *
-     * @ORM\Column(type="float")
-     */
+    #[Assert\NotBlank]
+    #[Assert\GreaterThanOrEqual(0)]
+    #[ORM\Column(type: 'float')]
     protected float $discount = 0.0;
 
-    /**
-     * @Assert\Valid()
-     *
-     * @ORM\Embedded(class="Padam87\SimplePayBundle\Entity\Browser")
-     */
+    #[Assert\Valid]
+    #[ORM\Embedded(class: Browser::class)]
     protected ?Browser $browser = null;
 
-    /**
-     * @Assert\Valid()
-     *
-     * @ORM\Embedded(class="Padam87\SimplePayBundle\Entity\Recurring")
-     */
+    #[Assert\Valid]
+    #[ORM\Embedded(class: Recurring::class)]
     protected ?Recurring $recurring = null;
 
     /**
      * @var Item[]|Collection
-     *
-     * @Assert\Valid()
      */
+    #[Assert\Valid]
     protected Collection $items;
 
-    /**
-     * @ORM\Column()
-     */
+    #[ORM\Column]
     protected ?string $status = null;
 
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
+    #[ORM\Column(type: 'integer', nullable: true)]
     protected ?int $responseCode = null;
 
     public function __construct()

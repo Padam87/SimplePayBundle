@@ -5,51 +5,32 @@ namespace Padam87\SimplePayBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\MappedSuperclass()
- */
+#[ORM\MappedSuperclass]
 class Item
 {
-    /**
-     * @Assert\NotBlank()
-     *
-     * @ORM\Column()
-     */
+    #[Assert\NotBlank]
+    #[ORM\Column]
     protected ?string $ref = null;
 
-    /**
-     * @Assert\NotBlank()
-     *
-     * @ORM\Column()
-     */
+    #[Assert\NotBlank]
+    #[ORM\Column]
     protected ?string $title = null;
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type: 'text', nullable: true)]
     protected ?string $description = null;
 
-    /**
-     * @Assert\NotBlank()
-     * @Assert\GreaterThanOrEqual(1)
-     *
-     * @ORM\Column(type="float")
-     */
+    #[Assert\NotBlank]
+    #[Assert\GreaterThanOrEqual(1)]
+    #[ORM\Column(type: 'float')]
     protected ?int $amount = null;
 
-    /**
-     * @Assert\NotBlank()
-     * @Assert\GreaterThanOrEqual(0)
-     *
-     * @ORM\Column(type="float")
-     */
+    #[Assert\NotBlank]
+    #[Assert\GreaterThanOrEqual(0)]
+    #[ORM\Column(type: 'float')]
     protected ?float $price = null;
 
-    /**
-     * @Assert\NotBlank()
-     *
-     * @ORM\Column(type="integer")
-     */
+    #[Assert\NotBlank]
+    #[ORM\Column(type: 'integer')]
     protected ?int $tax = null;
 
     public function toArray(): array
@@ -59,7 +40,7 @@ class Item
             'title' => $this->getTitle(),
             'description' => $this->getDescription(),
             'amount' => $this->getAmount(),
-            'price' => intval($this->getPrice()) == $this->getPrice() ? intval($this->getPrice()) : $this->getPrice(),
+            'price' => (int) $this->getPrice() == $this->getPrice() ? (int) $this->getPrice() : $this->getPrice(),
             'tax' => $this->getTax(),
         ];
     }
