@@ -308,24 +308,24 @@ class Transaction
         return $this;
     }
 
-    public function getShippingPrice()
+    public function getShippingPrice(): float
     {
         return $this->shippingPrice;
     }
 
-    public function setShippingPrice($shippingPrice)
+    public function setShippingPrice(float $shippingPrice): static
     {
         $this->shippingPrice = $shippingPrice;
 
         return $this;
     }
 
-    public function getDiscount()
+    public function getDiscount(): float
     {
         return $this->discount;
     }
 
-    public function setDiscount($discount)
+    public function setDiscount(float $discount): static
     {
         $this->discount = $discount;
 

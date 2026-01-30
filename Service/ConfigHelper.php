@@ -38,7 +38,7 @@ class ConfigHelper
 
     public function getMerchantById(string $id): array
     {
-        foreach ($this->config['merchants'] as $currency => $merchant) {
+        foreach ($this->config['merchants'] as $merchant) {
             if ($merchant['id'] === $id) {
                 return $merchant;
             }

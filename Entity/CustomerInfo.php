@@ -3,7 +3,6 @@
 namespace Padam87\SimplePayBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 class CustomerInfo
 {
@@ -48,9 +47,7 @@ class CustomerInfo
             'phone' => $this->getPhone(),
         ];
 
-        return array_filter($array, function ($value) {
-            return $value !== null;
-        });
+        return array_filter($array, fn(?string $value) => $value !== null);
     }
 
     public function getName(): ?string

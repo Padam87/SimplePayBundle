@@ -211,9 +211,7 @@ class SimplePay
             $data['threeDSReqAuthMethod'] = '02';
         }
 
-        $data = array_filter($data, function ($value) {
-            return $value != null;
-        });
+        $data = array_filter($data, fn($value) => $value != null);
 
         /** @var Item $item */
         foreach ($transaction->getItems() as $item) {
@@ -223,7 +221,7 @@ class SimplePay
         return $data;
     }
 
-    private function handleResponse(ResponseInterface $response, Transaction $transaction)
+    private function handleResponse(ResponseInterface $response, Transaction $transaction): void
     {
         $responseData = $response->toArray();
 
@@ -321,7 +319,7 @@ class SimplePay
         return $response;
     }
 
-    public function getSignature($secret, array $data)
+    public function getSignature($secret, array $data): string
     {
         return base64_encode(hash_hmac('sha384', json_encode($data), trim((string) $secret), true));
     }
