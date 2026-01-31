@@ -262,11 +262,11 @@ class SimplePay
             $request = $this->requestStack->getCurrentRequest();
         }
 
-        $data = json_decode(base64_decode((string) $request->get('r')), true);
+        $data = json_decode(base64_decode((string) $request->query->get('r')), true);
 
         $merchant = $this->configHelper->getMerchantById($data['m']);
 
-        if ($this->getSignature($merchant['secret'], $data) != $request->get('s')) {
+        if ($this->getSignature($merchant['secret'], $data) != $request->query->get('s')) {
             throw new InvalidSignatureException();
         }
 
