@@ -5,6 +5,3 @@ services:
     Padam87\SimplePayBundle\Service\SimplePay:
         autowire: true
         public: true
-    Padam87\SimplePayBundle\Form\StartPaymentType:
-        autowire: true
-        autoconfigure: true
