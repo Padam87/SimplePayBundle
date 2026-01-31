@@ -60,6 +60,7 @@ class SimplePay
                 'headers' => [
                     'Signature' => $this->getSignature($merchant['secret'], $data),
                 ],
+                'verify_peer' => false,
             ]
         );
 
@@ -96,6 +97,7 @@ class SimplePay
                 'headers' => [
                     'Signature' => $this->getSignature($merchant['secret'], $data),
                 ],
+                'verify_peer' => false,
             ]
         );
 
@@ -129,6 +131,7 @@ class SimplePay
                 'headers' => [
                     'Signature' => $this->getSignature($merchant['secret'], $data),
                 ],
+                'verify_peer' => false,
             ]
         );
 
@@ -156,6 +159,7 @@ class SimplePay
                 'headers' => [
                     'Signature' => $this->getSignature($merchant['secret'], $data),
                 ],
+                'verify_peer' => false,
             ]
         );
 
@@ -181,6 +185,7 @@ class SimplePay
                 'headers' => [
                     'Signature' => $this->getSignature($merchant['secret'], $data),
                 ],
+                'verify_peer' => false,
             ]
         );
 

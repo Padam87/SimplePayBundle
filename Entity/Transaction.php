@@ -39,7 +39,7 @@ class Transaction
     protected ?string $orderRef = null;
 
     #[Assert\Currency]
-    #[Assert\Choice(['HUF', 'EUR', 'USD'])]
+    #[Assert\Choice(choices: ['HUF', 'EUR', 'USD'])]
     #[ORM\Column]
     protected string $currency = 'HUF';
 
