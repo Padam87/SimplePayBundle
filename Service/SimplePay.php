@@ -294,7 +294,7 @@ class SimplePay
         }
 
         $signature = $request->headers->get('Signature');
-        $data = json_decode($request->getContent(), true);
+        $data = $request->toArray();
 
         $merchant = $this->configHelper->getMerchantById($data['merchant']);
 
